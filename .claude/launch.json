@@ -4,7 +4,7 @@
     {
       "name": "care-enrollment-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": ["--prefix", "web", "run", "dev"],
       "port": 3000
     }
   ]
