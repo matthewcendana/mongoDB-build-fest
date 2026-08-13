@@ -6,9 +6,9 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from app.config import settings
-from app.db import normalize_phone, profiles_col, serialize_doc
-from app.form import FORM_NAME, clause_title
+from backend.config import settings
+from backend.db import normalize_phone, profiles_col, serialize_doc
+from backend.form import FORM_NAME, clause_title
 
 logger = logging.getLogger(__name__)
 

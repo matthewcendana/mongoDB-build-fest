@@ -9,8 +9,8 @@ from langgraph.checkpoint.mongodb import MongoDBSaver
 from langgraph.graph import END, START, StateGraph
 from pymongo import MongoClient
 
-from app.config import settings
-from app.form import CONSENT_CLAUSE_ID, FORM_CLAUSES, clause_by_id, clause_title
+from backend.config import settings
+from backend.form import CONSENT_CLAUSE_ID, FORM_CLAUSES, clause_by_id, clause_title
 
 EventType = Literal["identify", "comprehension", "upsert_field", "consent", "handoff"]
 
