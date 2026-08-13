@@ -63,20 +63,43 @@ def ensure_indexes() -> None:
     _ensure_vector_index()
 
 
+def _index_fields(index: dict[str, Any]) -> list[dict[str, Any]]:
+    definition = (
+        index.get("latestDefinition")
+        or index.get("latestDefinitionNoArrays")
+        or index.get("definition")
+        or {}
+    )
+    return list(definition.get("fields") or [])
+
+
+def _is_autoembed_index(index: dict[str, Any]) -> bool:
+    return any(field.get("type") == "autoEmbed" for field in _index_fields(index))
+
+
 def _ensure_vector_index() -> None:
     name = settings.memory_index_name
     try:
-        existing = [idx.get("name") for idx in profiles_col().list_search_indexes()]
-        if name in existing:
+        existing = list(profiles_col().list_search_indexes())
+        for index in existing:
+            if index.get("name") != name:
+                continue
+            if _is_autoembed_index(index):
+                return
+            logger.warning(
+                "Search index %s exists but is not autoEmbed on memory_text. "
+                "Drop it in Atlas (Search & Vector Search) and restart the app.",
+                name,
+            )
             return
         model = SearchIndexModel(
             definition={
                 "fields": [
                     {
-                        "type": "vector",
-                        "path": "embedding",
-                        "numDimensions": settings.embedding_dimensions,
-                        "similarity": "cosine",
+                        "type": "autoEmbed",
+                        "modality": "text",
+                        "path": "memory_text",
+                        "model": settings.autoembed_model,
                     },
                     {"type": "filter", "path": "phone"},
                 ]
@@ -85,7 +108,11 @@ def _ensure_vector_index() -> None:
             type="vectorSearch",
         )
         profiles_col().create_search_index(model)
-        logger.info("Created vector search index %s", name)
+        logger.info(
+            "Created Automated Embedding index %s on memory_text (%s)",
+            name,
+            settings.autoembed_model,
+        )
     except Exception as exc:
         logger.warning("Could not ensure vector index %s: %s", name, exc)
 

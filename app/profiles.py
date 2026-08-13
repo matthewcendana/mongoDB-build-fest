@@ -1,12 +1,10 @@
-"""Caller long-term memory: upsert + phone-filtered vector retrieve."""
+"""Caller long-term memory: upsert + Atlas Automated Embedding retrieve."""
 
 from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
 from typing import Any
-
-import httpx
 
 from app.config import settings
 from app.db import normalize_phone, profiles_col, serialize_doc
@@ -16,23 +14,18 @@ logger = logging.getLogger(__name__)
 
 KNOWN_FIELD_KEYS = ("name", "email", "dob")
 
-
-def embed_text(text: str) -> list[float] | None:
-    api_key = settings.resolved_embedding_key
-    if not api_key or not text.strip():
-        return None
-    try:
-        response = httpx.post(
-            "https://api.openai.com/v1/embeddings",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={"model": settings.embedding_model, "input": text},
-            timeout=15.0,
-        )
-        response.raise_for_status()
-        return response.json()["data"][0]["embedding"]
-    except Exception as exc:
-        logger.warning("Embedding failed: %s", exc)
-        return None
+_PROFILE_PROJECTION = {
+    "phone": 1,
+    "name": 1,
+    "email": 1,
+    "dob": 1,
+    "pacing": 1,
+    "memory_text": 1,
+    "last_clause": 1,
+    "last_call_at": 1,
+    "status": 1,
+    "score": {"$meta": "vectorSearchScore"},
+}
 
 
 def _memory_text(profile: dict[str, Any], state: dict[str, Any] | None = None) -> str:
@@ -56,6 +49,16 @@ def _memory_text(profile: dict[str, Any], state: dict[str, Any] | None = None) -
     return " ".join(parts)
 
 
+def _write_profile(phone: str, update: dict[str, Any]) -> dict[str, Any]:
+    profiles_col().update_one(
+        {"phone": phone},
+        {"$set": update, "$unset": {"embedding": ""}},
+        upsert=True,
+    )
+    stored = profiles_col().find_one({"phone": phone}) or update
+    return serialize_doc(stored) or update
+
+
 def upsert_from_state(phone: str, state: dict[str, Any]) -> dict[str, Any]:
     phone = normalize_phone(phone)
     known = dict(state.get("known_fields") or {})
@@ -72,13 +75,7 @@ def upsert_from_state(phone: str, state: dict[str, Any]) -> dict[str, Any]:
         "status": state.get("status") or existing.get("status") or "in_progress",
     }
     profile["memory_text"] = _memory_text(profile, state)
-    embedding = embed_text(profile["memory_text"])
-    update = dict(profile)
-    if embedding:
-        update["embedding"] = embedding
-    profiles_col().update_one({"phone": phone}, {"$set": update}, upsert=True)
-    stored = profiles_col().find_one({"phone": phone}) or profile
-    return serialize_doc(stored) or profile
+    return _write_profile(phone, profile)
 
 
 def upsert_field(phone: str, field: str, value: str) -> dict[str, Any]:
@@ -88,7 +85,6 @@ def upsert_field(phone: str, field: str, value: str) -> dict[str, Any]:
         existing[field] = value
     existing["last_call_at"] = datetime.now(timezone.utc)
     existing["memory_text"] = _memory_text(existing)
-    embedding = embed_text(existing["memory_text"])
     update = {
         "phone": phone,
         field: value,
@@ -96,49 +92,38 @@ def upsert_field(phone: str, field: str, value: str) -> dict[str, Any]:
         "last_call_at": existing["last_call_at"],
         "pacing": existing.get("pacing", "slow"),
     }
-    if embedding:
-        update["embedding"] = embedding
-    profiles_col().update_one({"phone": phone}, {"$set": update}, upsert=True)
-    stored = profiles_col().find_one({"phone": phone}) or existing
-    return serialize_doc(stored) or existing
+    return _write_profile(phone, update)
+
+
+def _vector_search_stage(phone: str, query_value: Any) -> dict[str, Any]:
+    return {
+        "$vectorSearch": {
+            "index": settings.memory_index_name,
+            "path": "memory_text",
+            "query": query_value,
+            "model": settings.autoembed_model,
+            "numCandidates": 20,
+            "limit": 1,
+            "filter": {"phone": {"$eq": phone}},
+        }
+    }
 
 
 def _vector_search(phone: str, query: str) -> dict[str, Any] | None:
-    vector = embed_text(query)
-    if not vector:
-        return None
-    pipeline = [
-        {
-            "$vectorSearch": {
-                "index": settings.memory_index_name,
-                "path": "embedding",
-                "queryVector": vector,
-                "numCandidates": 20,
-                "limit": 1,
-                "filter": {"phone": {"$eq": phone}},
-            }
-        },
-        {
-            "$project": {
-                "phone": 1,
-                "name": 1,
-                "email": 1,
-                "dob": 1,
-                "pacing": 1,
-                "memory_text": 1,
-                "last_clause": 1,
-                "last_call_at": 1,
-                "status": 1,
-                "score": {"$meta": "vectorSearchScore"},
-            }
-        },
-    ]
-    try:
-        hits = list(profiles_col().aggregate(pipeline))
-        return hits[0] if hits else None
-    except Exception as exc:
-        logger.warning("Vector search failed, falling back to phone lookup: %s", exc)
-        return None
+    last_error: Exception | None = None
+    for query_value in (query, {"text": query}):
+        try:
+            hits = list(
+                profiles_col().aggregate(
+                    [_vector_search_stage(phone, query_value), {"$project": _PROFILE_PROJECTION}]
+                )
+            )
+            return hits[0] if hits else None
+        except Exception as exc:
+            last_error = exc
+            continue
+    logger.warning("Vector search failed, falling back to phone lookup: %s", last_error)
+    return None
 
 
 def retrieve_profile(phone: str) -> dict[str, Any] | None:
