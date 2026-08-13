@@ -216,3 +216,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Next.js
+/node_modules
+/.pnp
+.pnp.*
+/.next/
+/out/
+/build
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# The Python "lib/" ignore rule above also matches src/lib/ — un-ignore it
+!src/lib/
+!src/lib/**
