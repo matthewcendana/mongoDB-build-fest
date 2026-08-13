@@ -1,4 +1,4 @@
-"""Never Cold persistence API — FastAPI contract for the ElevenLabs agent."""
+"""CareLoop persistence API — FastAPI contract for the ElevenLabs agent."""
 
 from __future__ import annotations
 
@@ -10,10 +10,10 @@ from urllib.parse import unquote
 
 from fastapi import FastAPI, Query, Request
 
-from app import db, graph, profiles
-from app.db import normalize_phone
-from app.form import FORM_NAME, clause_by_id, clause_title
-from app.models import (
+from backend import db, graph, profiles
+from backend.db import normalize_phone
+from backend.form import FORM_NAME, clause_by_id, clause_title
+from backend.models import (
     CallerContextPayload,
     ComprehensionPayload,
     ConsentPayload,
@@ -31,13 +31,13 @@ async def lifespan(app: FastAPI):
     client = db.get_client()
     db.ensure_indexes()
     graph.init_graph(client)
-    logger.info("Never Cold persistence ready")
+    logger.info("CareLoop persistence ready")
     yield
     db.close_client()
 
 
 app = FastAPI(
-    title="Never Cold persistence",
+    title="CareLoop persistence",
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -298,4 +298,4 @@ def dashboard_sessions(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)

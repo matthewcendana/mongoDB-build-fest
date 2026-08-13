@@ -6,15 +6,15 @@ const STATUS_CONFIG: Record<
 > = {
   ready: {
     label: "Ready to invite",
-    className: "bg-slate-100 text-slate-700 ring-slate-300",
+    className: "hw-btn",
   },
   in_progress: {
     label: "In Progress",
-    className: "bg-amber-100 text-amber-800 ring-amber-300",
+    className: "hw-btn-lit",
   },
   completed: {
     label: "Completed",
-    className: "bg-emerald-100 text-emerald-800 ring-emerald-300",
+    className: "badge-enamel",
   },
 };
 
@@ -28,7 +28,7 @@ export default function StatusBadge({
   const config = STATUS_CONFIG[status];
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ring-1 ring-inset ${config.className} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold ${config.className} ${className}`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
@@ -36,7 +36,7 @@ export default function StatusBadge({
             ? "bg-slate-500"
             : status === "in_progress"
               ? "bg-amber-500"
-              : "bg-emerald-500"
+              : "bg-mdb-leaf"
         }`}
       />
       {config.label}

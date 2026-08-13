@@ -26,8 +26,8 @@ export interface PatientState {
   auditEvents: AuditEvent[];
 }
 
-const STORAGE_PREFIX = "careflow:patient:";
-const UPDATE_EVENT = "careflow:patient-update";
+const STORAGE_PREFIX = "careloop:patient:";
+const UPDATE_EVENT = "careloop:patient-update";
 
 function storageKey(patientId: string) {
   return `${STORAGE_PREFIX}${patientId}`;
@@ -38,7 +38,7 @@ export function createDefaultPatientState(patientId: string): PatientState {
     patientId,
     patientFirstName: "Mary",
     patientFullName: "Mary Johnson",
-    programName: "HeartHealth Support Program",
+    programName: "CareLoop",
     currentStep: 0,
     formData: {
       fullName: "Mary Johnson",

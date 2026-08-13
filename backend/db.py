@@ -13,8 +13,8 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.operations import SearchIndexModel
 
-from app.config import settings
-from app.form import FORM_ID, clause_title
+from backend.config import settings
+from backend.form import FORM_ID, clause_title
 
 logger = logging.getLogger(__name__)
 

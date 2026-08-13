@@ -1,20 +1,14 @@
 "use client";
 
+import { ConversationProvider } from "@elevenlabs/react";
 import { usePatientState } from "@/hooks/use-patient-state";
+import { useEnrollmentVoice } from "@/hooks/use-enrollment-voice";
 import type { EnrollmentFormData } from "@/lib/patient-store";
 import ProgressIndicator from "./ProgressIndicator";
+import VoiceStatusBar from "./VoiceStatusBar";
 
 const PROGRAM_DESCRIPTION =
-  "The HeartHealth Support Program helps patients manage medications, schedule appointments, and coordinate transportation to medical visits. A care coordinator may contact you to help arrange these services.";
-
-const SIMULATED_UNDERSTANDING =
-  "This program will help me keep track of my medicines, remind me about doctor visits, and help arrange rides to appointments. A care coordinator will call me to help set this up.";
-
-const SIMULATED_CONTACT_INFO: Partial<EnrollmentFormData> = {
-  phoneNumber: "(555) 214-7788",
-  emergencyContactName: "Daniel Johnson",
-  emergencyContactRelationship: "Son",
-};
+  "CareLoop helps patients manage medications, schedule appointments, and coordinate transportation to medical visits. A care coordinator may contact you to help arrange these services.";
 
 function MicIcon() {
   return (
@@ -51,7 +45,7 @@ function PrimaryButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="w-full min-w-[260px] rounded-2xl bg-blue-700 px-10 py-6 text-2xl font-bold text-white shadow-md transition-colors hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto sm:text-3xl"
+      className="hw-btn-lit w-full min-w-[260px] cursor-pointer rounded-full px-10 py-5 text-xl font-semibold disabled:cursor-not-allowed sm:w-auto sm:text-2xl"
     >
       {children}
     </button>
@@ -68,24 +62,7 @@ function SecondaryButton({
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-xl border-2 border-slate-400 px-6 py-4 text-xl font-semibold text-slate-700 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-200 sm:w-auto"
-    >
-      {children}
-    </button>
-  );
-}
-
-function TestButton({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-xl border-2 border-dashed border-purple-300 bg-purple-50 px-5 py-3 text-base font-semibold text-purple-700 transition-colors hover:bg-purple-100"
+      className="hw-btn w-full cursor-pointer rounded-full px-6 py-4 text-xl font-semibold sm:w-auto"
     >
       {children}
     </button>
@@ -94,20 +71,28 @@ function TestButton({
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <label className="mb-2 block text-xl font-bold text-slate-800 sm:text-2xl">
+    <label className="hw-label mb-2 block text-[#5a6a6e] sm:text-xs">
       {children}
     </label>
   );
 }
 
 const inputClasses =
-  "w-full rounded-2xl border-2 border-slate-300 px-5 py-5 text-2xl text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-200 sm:text-2xl";
+  "well w-full rounded-2xl px-5 py-5 text-2xl text-mdb-dark sm:text-2xl";
 
 export default function PatientEnrollmentClient({
   patientId,
 }: {
   patientId: string;
 }) {
+  return (
+    <ConversationProvider>
+      <EnrollmentExperience patientId={patientId} />
+    </ConversationProvider>
+  );
+}
+
+function EnrollmentExperience({ patientId }: { patientId: string }) {
   const { state, mutate, logEvent } = usePatientState(patientId);
 
   const {
@@ -138,10 +123,6 @@ export default function PatientEnrollmentClient({
     mutate((prev) => ({ ...prev, understandingSummary: value }));
   }
 
-  function simulateUnderstanding() {
-    setUnderstandingSummary(SIMULATED_UNDERSTANDING);
-  }
-
   function completeStep1() {
     mutate((prev) => ({
       ...prev,
@@ -157,13 +138,6 @@ export default function PatientEnrollmentClient({
     mutate((prev) => ({
       ...prev,
       formData: { ...prev.formData, [field]: value },
-    }));
-  }
-
-  function simulateVoiceFill() {
-    mutate((prev) => ({
-      ...prev,
-      formData: { ...prev.formData, ...SIMULATED_CONTACT_INFO },
     }));
   }
 
@@ -189,18 +163,37 @@ export default function PatientEnrollmentClient({
     logEvent(`${state.patientFirstName} confirmed enrollment ✓`);
   }
 
+  const voice = useEnrollmentVoice(state, {
+    beginEnrollment,
+    updateField,
+    setUnderstandingSummary,
+    goToStep,
+    completeStep1,
+    completeStep2,
+    confirmEnrollment,
+    logEvent,
+  });
+
   const isConfirmed = enrollmentStatus === "completed";
+  const voiceActive = voice.status !== "disconnected";
 
   return (
-    <div className="flex min-h-dvh flex-col bg-white text-slate-900">
-      <header className="border-b-2 border-blue-900 bg-blue-900 px-6 py-6 sm:py-8">
-        <h1 className="mx-auto max-w-3xl text-center text-3xl font-extrabold text-white sm:text-4xl">
-          HeartHealth Enrollment
+    <div
+      className={`studio flex min-h-dvh flex-col text-mdb-dark ${
+        voiceActive ? "pb-28" : ""
+      }`}
+    >
+      <header className="plate-dark px-6 py-6 sm:py-8">
+        <p className="hw-label mx-auto max-w-3xl text-center text-mdb-spring">
+          CareLoop
+        </p>
+        <h1 className="mx-auto max-w-3xl text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          Enrollment
         </h1>
       </header>
 
       {currentStep > 0 && (
-        <div className="border-b border-slate-200 bg-slate-50 px-4 py-6 sm:py-8">
+        <div className="plate-dark/0 border-b border-white/5 bg-[#0f1b20] px-4 py-6 sm:py-8">
           <ProgressIndicator
             currentStep={currentStep}
             confirmedSteps={confirmedSteps}
@@ -209,37 +202,46 @@ export default function PatientEnrollmentClient({
       )}
 
       <main className="flex flex-1 items-center justify-center px-4 py-10 sm:py-16">
-        <div className="w-full max-w-2xl rounded-3xl border-2 border-slate-200 p-8 shadow-sm sm:p-12">
+        <div className="chassis w-full max-w-2xl rounded-[32px] p-3">
+        <div className="plate-light rounded-[24px] p-8 sm:p-12">
           {currentStep === 0 && (
             <div className="flex flex-col items-center gap-8 text-center">
-              <p className="text-4xl font-extrabold sm:text-5xl">
+              <p className="text-4xl font-semibold tracking-tight sm:text-5xl">
                 Hi {patientFirstName}
               </p>
-              <p className="max-w-lg text-2xl leading-relaxed text-slate-700 sm:text-3xl">
+              <p className="max-w-lg text-2xl leading-relaxed text-[#4a443a] sm:text-3xl">
                 I&apos;m your voice guide. I&apos;ll explain each step and fill
                 things out with you.
               </p>
-              <PrimaryButton onClick={beginEnrollment}>
+              <PrimaryButton onClick={voice.startVoice} disabled={voice.starting}>
                 <span className="inline-flex items-center gap-3">
                   <MicIcon />
-                  Start Voice Guide
+                  {voice.starting ? "Connecting…" : "Start Voice Guide"}
                 </span>
               </PrimaryButton>
+              <SecondaryButton onClick={beginEnrollment}>
+                Continue without voice
+              </SecondaryButton>
+              {voice.error && (
+                <p className="max-w-md text-lg font-semibold text-red-700" role="alert">
+                  {voice.error}
+                </p>
+              )}
             </div>
           )}
 
           {currentStep === 1 && (
             <div className="flex flex-col gap-8">
               <div>
-                <h2 className="text-3xl font-extrabold sm:text-4xl">
+                <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                   About the program
                 </h2>
-                <p className="mt-6 text-2xl leading-relaxed text-slate-700 sm:text-2xl">
+                <p className="mt-6 text-2xl leading-relaxed text-[#4a443a] sm:text-2xl">
                   {PROGRAM_DESCRIPTION}
                 </p>
               </div>
 
-              <p className="text-xl font-semibold text-blue-900 sm:text-2xl">
+              <p className="text-xl font-semibold text-mdb sm:text-2xl">
                 Before continuing, we&apos;ll make sure this makes sense.
               </p>
 
@@ -251,12 +253,13 @@ export default function PatientEnrollmentClient({
                   placeholder="Tell us in your own words what this program does…"
                   className={`${inputClasses} min-h-[200px] resize-none leading-relaxed`}
                 />
-                <div className="mt-4">
-                  <TestButton onClick={simulateUnderstanding}>
-                    <MicIcon />
-                    Simulate voice input (test)
-                  </TestButton>
-                </div>
+                {voice.status === "disconnected" && (
+                  <div className="mt-4">
+                    <SecondaryButton onClick={voice.startVoice}>
+                      Start voice guide
+                    </SecondaryButton>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-between">
@@ -275,7 +278,7 @@ export default function PatientEnrollmentClient({
 
           {currentStep === 2 && (
             <div className="flex flex-col gap-8">
-              <h2 className="text-3xl font-extrabold sm:text-4xl">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                 Your information
               </h2>
 
@@ -330,13 +333,6 @@ export default function PatientEnrollmentClient({
                 </div>
               </div>
 
-              <div>
-                <TestButton onClick={simulateVoiceFill}>
-                  <MicIcon />
-                  Simulate voice fill (test)
-                </TestButton>
-              </div>
-
               <div className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-between">
                 <SecondaryButton onClick={() => goToStep(1)}>
                   Back
@@ -350,55 +346,55 @@ export default function PatientEnrollmentClient({
 
           {currentStep === 3 && (
             <div className="flex flex-col gap-8">
-              <h2 className="text-3xl font-extrabold sm:text-4xl">Consent</h2>
-              <p className="text-2xl leading-relaxed text-slate-700">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Consent</h2>
+              <p className="text-2xl leading-relaxed text-[#4a443a]">
                 By enrolling, you agree that the {programName} may use the
                 information you provided to coordinate the services described
                 above. You can ask questions before deciding.
               </p>
 
-              <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-6 sm:p-8">
-                <h3 className="text-xl font-bold text-slate-800 sm:text-2xl">
+              <div className="well rounded-2xl p-6 sm:p-8">
+                <h3 className="text-xl font-semibold text-mdb-dark sm:text-2xl">
                   Review your information
                 </h3>
                 <dl className="mt-4 space-y-3 text-lg sm:text-xl">
                   <div className="flex flex-col sm:flex-row sm:justify-between">
-                    <dt className="font-semibold text-slate-500">
+                    <dt className="font-semibold text-[#6b655c]">
                       Full Name
                     </dt>
-                    <dd className="text-slate-900">
+                    <dd className="text-mdb-dark">
                       {formData.fullName || "—"}
                     </dd>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between">
-                    <dt className="font-semibold text-slate-500">
+                    <dt className="font-semibold text-[#6b655c]">
                       Phone Number
                     </dt>
-                    <dd className="text-slate-900">
+                    <dd className="text-mdb-dark">
                       {formData.phoneNumber || "—"}
                     </dd>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between">
-                    <dt className="font-semibold text-slate-500">
+                    <dt className="font-semibold text-[#6b655c]">
                       Emergency Contact
                     </dt>
-                    <dd className="text-slate-900">
+                    <dd className="text-mdb-dark">
                       {formData.emergencyContactName || "—"}
                     </dd>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between">
-                    <dt className="font-semibold text-slate-500">
+                    <dt className="font-semibold text-[#6b655c]">
                       Relationship
                     </dt>
-                    <dd className="text-slate-900">
+                    <dd className="text-mdb-dark">
                       {formData.emergencyContactRelationship || "—"}
                     </dd>
                   </div>
-                  <div className="border-t border-slate-200 pt-3">
-                    <dt className="font-semibold text-slate-500">
+                  <div className="border-t border-[#d8d0c2] pt-3">
+                    <dt className="font-semibold text-[#6b655c]">
                       Your understanding
                     </dt>
-                    <dd className="mt-1 text-slate-900">
+                    <dd className="mt-1 text-mdb-dark">
                       {understandingSummary || "—"}
                     </dd>
                   </div>
@@ -407,7 +403,7 @@ export default function PatientEnrollmentClient({
 
               {!isConfirmed ? (
                 <>
-                  <div className="flex items-center justify-center rounded-2xl bg-amber-50 px-6 py-4 text-xl font-bold text-amber-800 ring-1 ring-inset ring-amber-200 sm:text-2xl">
+                  <div className="btn-raised-ivory flex items-center justify-center rounded-2xl px-6 py-4 text-xl font-bold text-amber-950 sm:text-2xl">
                     Waiting for your confirmation
                   </div>
                   <div className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-between">
@@ -420,14 +416,23 @@ export default function PatientEnrollmentClient({
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center rounded-2xl bg-emerald-50 px-6 py-6 text-3xl font-extrabold text-emerald-700 ring-1 ring-inset ring-emerald-200 sm:text-4xl">
+                <div className="badge-enamel flex items-center justify-center rounded-2xl px-6 py-6 text-3xl font-semibold sm:text-4xl">
                   Enrollment confirmed ✓
                 </div>
               )}
             </div>
           )}
         </div>
+        </div>
       </main>
+
+      <VoiceStatusBar
+        status={voice.status}
+        isSpeaking={Boolean(voice.isSpeaking)}
+        isMuted={Boolean(voice.isMuted)}
+        onToggleMute={() => voice.setMuted?.(!voice.isMuted)}
+        onEnd={voice.stopVoice}
+      />
     </div>
   );
 }

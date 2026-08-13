@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Care Enrollment Platform",
-  description: "Elderly healthcare enrollment assistant — hackathon MVP",
+  title: "CareLoop",
+  description: "Voice-guided care enrollment that remembers every caller.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

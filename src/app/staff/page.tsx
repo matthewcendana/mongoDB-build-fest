@@ -42,34 +42,40 @@ export default function StaffDashboardPage() {
   );
 
   return (
-    <div className="min-h-dvh bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-            Care Enrollment Dashboard
-          </h1>
+    <div className="studio px-4 py-8 sm:px-8">
+      <div className="chassis mx-auto max-w-5xl overflow-hidden rounded-[32px]">
+      <header className="plate-dark">
+        <div className="flex items-center justify-between px-6 py-6 sm:px-8">
+          <div>
+            <p className="hw-label text-mdb-spring">
+              CareLoop
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              Enrollment Dashboard
+            </h1>
+          </div>
           <button
             onClick={handleReset}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100"
+            className="hw-btn-lit rounded-full px-3 py-1.5 text-xs font-medium"
           >
             Reset demo data
           </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <main className="plate-light px-6 py-10 sm:px-8">
+        <section className="rounded-2xl bg-white/70 p-6 shadow-[inset_0_1px_0_#fff,0_8px_20px_rgba(0,0,0,0.08)] sm:p-8">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">
+                <div className="avatar-enamel flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white">
                   MJ
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">
+                  <h2 className="text-xl font-semibold text-mdb-dark">
                     {state.patientFullName}
                   </h2>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-[#5c564c]">
                     {state.programName}
                   </p>
                 </div>
@@ -78,10 +84,10 @@ export default function StaffDashboardPage() {
             <StatusBadge status={state.enrollmentStatus} className="shrink-0" />
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-6">
+          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-[#d8d0c2] pt-6">
             <button
               onClick={handleSendLink}
-              className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800"
+              className="hw-btn-lit rounded-full px-5 py-2.5 text-sm font-semibold"
             >
               Send enrollment link
             </button>
@@ -90,36 +96,36 @@ export default function StaffDashboardPage() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleOpenPreview}
-              className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100"
+              className="hw-btn rounded-full px-5 py-2.5 text-sm font-semibold"
             >
               Open patient experience
             </Link>
             {justSent && (
-              <span className="text-sm font-medium text-emerald-600">
+              <span className="text-sm font-medium text-mdb">
                 Link sent ✓
               </span>
             )}
           </div>
         </section>
 
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <h3 className="text-lg font-bold text-slate-900">Audit Trail</h3>
-          <p className="mt-1 text-sm text-slate-500">
+        <section className="mt-8 rounded-2xl bg-white/70 p-6 shadow-[inset_0_1px_0_#fff,0_8px_20px_rgba(0,0,0,0.08)] sm:p-8">
+          <h3 className="text-lg font-semibold text-mdb-dark">Audit Trail</h3>
+          <p className="mt-1 text-sm text-[#5c564c]">
             Timestamped activity for this patient&apos;s enrollment.
           </p>
 
           <ol className="mt-6 space-y-4">
             {orderedEvents.length === 0 && (
-              <li className="text-sm text-slate-400">No activity yet.</li>
+              <li className="text-sm text-[#8a8478]">No activity yet.</li>
             )}
             {orderedEvents.map((event) => (
               <li key={event.id} className="flex gap-4">
-                <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                <div className="pin-dot mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" />
                 <div>
-                  <p className="text-sm font-medium text-slate-800">
+                  <p className="text-sm font-medium text-mdb-dark">
                     {event.message}
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-[#8a8478]">
                     {formatTimestamp(event.timestamp)}
                   </p>
                 </div>
@@ -128,6 +134,7 @@ export default function StaffDashboardPage() {
           </ol>
         </section>
       </main>
+      </div>
     </div>
   );
 }
