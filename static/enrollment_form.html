@@ -1,0 +1,482 @@
+<title>Medicare Annual Wellness Visit — Enrollment &amp; Consent Record</title>
+<style>
+  :root {
+    --page-bg: #e8e6df;
+    --paper: #fbfaf6;
+    --ink: #1b1b18;
+    --ink-soft: #46453f;
+    --ink-faint: #8a8779;
+    --navy: #1f3a5c;
+    --navy-soft: #e6ebf1;
+    --rule: #b6b3a4;
+    --rule-strong: #8f8c7c;
+    --focus: #1f3a5c;
+
+    --serif: Cambria, "Times New Roman", Times, "Liberation Serif", Georgia, serif;
+    --sans: Arial, "Helvetica Neue", Helvetica, "Liberation Sans", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page-bg: #0f1214; }
+  }
+  :root[data-theme="dark"] { --page-bg: #0f1214; }
+  :root[data-theme="light"] { --page-bg: #e8e6df; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--page-bg);
+    font-family: var(--sans);
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px 64px;
+  }
+
+  .sheet {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--rule-strong);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.18);
+    padding: 34px 40px 28px;
+    overflow: hidden;
+  }
+
+  .watermark {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-24deg);
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 92px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    opacity: 0.035;
+    pointer-events: none;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  /* Letterhead */
+  .letterhead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 2.5px solid var(--ink);
+  }
+
+  .agency-lockup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .agency-mark {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border: 1.5px solid var(--navy);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--navy);
+  }
+
+  .agency-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+  }
+
+  .agency-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 1px;
+  }
+
+  .form-meta {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  /* Title bar */
+  .title-bar {
+    text-align: center;
+    padding: 22px 0 18px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: 0.01em;
+    margin: 0 0 4px;
+    text-wrap: balance;
+  }
+
+  .title-sub {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  /* Instructions */
+  .instructions {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--serif);
+    font-size: 14.5px;
+    line-height: 1.62;
+    color: var(--ink-soft);
+  }
+
+  .instructions p { margin: 0 0 10px; }
+  .instructions p:last-child { margin-bottom: 0; }
+  .instructions strong {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  /* Sections */
+  .form-section {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .section-label {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+
+  .ruled-field {
+    margin-bottom: 20px;
+  }
+  .ruled-field:last-child { margin-bottom: 0; }
+
+  .ruled-field label {
+    display: block;
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .line-input {
+    width: 100%;
+    font-family: var(--serif);
+    font-size: 17px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.25px solid var(--rule-strong);
+    padding: 6px 2px 8px;
+  }
+
+  .line-input::placeholder { color: var(--ink-faint); }
+
+  .line-input:focus-visible {
+    outline: none;
+    border-bottom-color: var(--focus);
+    box-shadow: 0 1.25px 0 0 var(--focus);
+  }
+
+  .hint {
+    display: block;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-top: 6px;
+  }
+
+  /* Consent */
+  .consent-block {
+    margin-bottom: 22px;
+  }
+
+  .check-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    cursor: pointer;
+    position: relative;
+    margin-top: 2px;
+  }
+
+  input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 12px;
+    border: solid var(--navy);
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(40deg);
+  }
+
+  input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .check-line span {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  .check-line em {
+    font-style: italic;
+    color: var(--navy);
+  }
+
+  .signature-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 24px;
+  }
+
+  .sig-field label {
+    display: block;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    margin-top: 6px;
+  }
+
+  .sig-input { font-family: var(--serif); }
+
+  /* Office use box */
+  .office-use {
+    margin: 20px 0 4px;
+    border: 1px solid var(--rule-strong);
+    background: var(--navy-soft);
+    padding: 14px 18px 16px;
+  }
+
+  .office-use-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+
+  .office-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+
+  .office-grid div {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding-bottom: 3px;
+    border-bottom: 1px dotted var(--rule-strong);
+  }
+
+  .office-grid span { white-space: nowrap; }
+  .office-grid i { flex: 1; }
+
+  /* Submit */
+  .submit-row {
+    padding-top: 22px;
+    display: flex;
+    justify-content: center;
+  }
+
+  button {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+    border: none;
+    padding: 14px 34px;
+    cursor: pointer;
+  }
+
+  button:hover { background: var(--navy); }
+
+  button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  /* Fine print */
+  .fine-print {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .fine-print p {
+    font-family: var(--serif);
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--ink-faint);
+    margin: 0 0 10px;
+  }
+
+  .footer-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 480px) {
+    .sheet { padding: 26px 20px 22px; }
+    h1 { font-size: 20px; }
+    .signature-row { grid-template-columns: 1fr; gap: 18px; }
+    .office-grid { grid-template-columns: 1fr; }
+    .watermark { font-size: 60px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="sheet">
+  <div class="watermark">SPECIMEN</div>
+
+  <header class="letterhead">
+    <div class="agency-lockup">
+      <div class="agency-mark">NC</div>
+      <div>
+        <div class="agency-title">NEVER COLD CARE COORDINATION</div>
+        <div class="agency-sub">Wellness Visit Enrollment Program</div>
+      </div>
+    </div>
+    <div class="form-meta">
+      <div>FORM WVP&#8209;104</div>
+      <div>REV. 03/2026</div>
+    </div>
+  </header>
+
+  <div class="title-bar">
+    <h1>Medicare Annual Wellness Visit</h1>
+    <p class="title-sub">Enrollment &amp; Consent Record</p>
+  </div>
+
+  <section class="instructions">
+    <p><strong>Purpose.</strong> This visit is a yearly wellness check covered by Medicare, used to build or update your personalized prevention plan — not to treat a new illness today.</p>
+    <p><strong>Information collected.</strong> Your health history, current medications, and answers about daily activities and mood, so your care team can recommend screenings and follow-up.</p>
+    <p><strong>How it may be shared.</strong> With your primary care clinician and members of your care team for this visit only. This information is not sold.</p>
+  </section>
+
+  <form>
+    <section class="form-section">
+      <div class="section-label">Section 1 — Identification</div>
+      <div class="ruled-field">
+        <label for="f-name">1. Full legal name, as shown on Medicare card</label>
+        <input class="line-input" type="text" id="f-name" name="name" autocomplete="off">
+      </div>
+      <div class="ruled-field">
+        <label for="f-phone">2. Telephone number</label>
+        <input class="line-input" type="tel" id="f-phone" name="phone" autocomplete="off">
+        <span class="hint">Read back to you on the call for confirmation before enrollment continues.</span>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-label">Section 2 — Consent to Enroll</div>
+      <div class="consent-block">
+        <label class="check-line" for="f-consent">
+          <input type="checkbox" id="f-consent" name="consent">
+          <span>I have had this visit explained to me, I understand its purpose, and I consent to enroll. Saying <em>&ldquo;OK&rdquo;</em> on the recorded call constitutes my consent.</span>
+        </label>
+      </div>
+      <div class="signature-row">
+        <div class="sig-field">
+          <input class="line-input sig-input" type="text" autocomplete="off">
+          <label>Signature, or verbal consent as recorded</label>
+        </div>
+        <div class="sig-field">
+          <input class="line-input sig-input" type="text" placeholder="MM / DD / YYYY" autocomplete="off">
+          <label>Date</label>
+        </div>
+      </div>
+    </section>
+
+    <div class="office-use">
+      <div class="office-use-title">For Office Use Only</div>
+      <div class="office-grid">
+        <div><span>Session&nbsp;ID</span><i></i></div>
+        <div><span>Confirmed&nbsp;through&nbsp;clause</span><i></i></div>
+        <div><span>Consent&nbsp;recorded</span><i></i></div>
+        <div><span>Verified&nbsp;by</span><i></i></div>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button type="submit">Submit Enrollment Record</button>
+    </div>
+  </form>
+
+  <footer class="fine-print">
+    <p>This record is retained as part of your Wellness Visit file to document that the enrollment process was explained and understood. See the program's Notice of Privacy Practices for details on how this information is used and shared.</p>
+    <div class="footer-meta">
+      <span>WVP-104 (03/2026)</span>
+      <span>Page 1 of 1</span>
+    </div>
+  </footer>
+</div>
